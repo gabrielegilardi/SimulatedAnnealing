@@ -1,5 +1,5 @@
 """
-Metaheuristic Minimization Using Population-Based Simulated Annealing.
+Metaheuristic Optimization Using Population-Based Simulated Annealing.
 
 Copyright (c) 2021 Gabriele Gilardi
 

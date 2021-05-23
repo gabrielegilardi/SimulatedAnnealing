@@ -1,4 +1,4 @@
-# Metaheuristic Minimization Using Population-Based Simulated Annealing
+# Metaheuristic Optimization Using Population-Based Simulated Annealing
 
 ## Features
 
