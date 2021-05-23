@@ -7,8 +7,6 @@ Copyright (c) 2021 Gabriele Gilardi
 Features
 --------
 - The code has been written and tested in Python 3.8.8.
-- Population-based Simulated Annealing (SA) implementation for metaheuristic
-  minimization.
 - Variables can be real, integer, or mixed real/integer.
 - Variables can be constrained to a specific interval or value setting the
   lower and the upper boundaries.
@@ -48,18 +46,18 @@ sigma0 > 0
     Initial standard deviation used to search the neighboroud of a state.
 IntVar
     List of indexes specifying which variable should be treated as integer.
-    If all variables are real set IntVar=None. Indexes are specified in the
-    range 1 to nVar.
+    If all variables are real set <IntVar> = <None>. Indexes are specified
+    in the range 1 to <nVar>.
 normalize = True, False
     Specifies if the search space should be normalized. If <True>, parameter
     <sigma0> is applied to the normalized search space.
 args
     Tuple containing any parameter that needs to be passed to the function. If
-    no parameters are passed set args=None.
+    no parameters are passed set <args> = <None>.
 nVar
     Number of variables.
 Xsol
-    Solution to the minimization point. Set Xsol=None if not known.
+    Solution to the minimization point. Set <Xsol> = <None> if not known.
 
 Examples
 --------

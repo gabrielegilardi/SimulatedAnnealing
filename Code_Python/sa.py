@@ -22,12 +22,11 @@ def SA(func, LB, UB, nPop=10, epochs=100, nMove=20, T0=0.1, alphaT=0.99,
     alphaT          Temperature reduction rate
     sigma0          Initial standard deviation used to search the neighboroud
                     of a state (given as a fraction of the search space)
-    alphaS          Sigma (std) reduction rate
+    alphaS          Standard deviation reduction rate
     prob            Probability the dimension of a state is changed
     IntVar          List of indexes specifying which variable should be treated
                     as integer
-    normalize       Specifies if the search space should be normalized (to
-                    improve convergency)
+    normalize       Specifies if the search space should be normalized
     args            Tuple containing any parameter that needs to be passed to
                     the function
 

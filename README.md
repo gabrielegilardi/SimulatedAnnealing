@@ -3,8 +3,6 @@
 ## Features
 
 - The code has been written and tested in Python 3.8.8.
-- Population-based Simulated Annealing (SA) implementation for metaheuristic
-  minimization.
 - Variables can be real, integer, or mixed real/integer.
 - Variables can be constrained to a specific interval or value setting the lower and the upper boundaries.  
 - Neighboroud search is performed using a normal distribution along randomly chosen dimensions.
