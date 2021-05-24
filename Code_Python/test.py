@@ -92,8 +92,8 @@ if len(sys.argv) != 2:
     sys.exit(1)
 example = sys.argv[1]
 
-# Parabola: F(X) = sum((X - X0)^2), Xmin = X0
-
+# Parabola: F(X) = sum((X - X0)^2)
+# Xmin = X0
 if (example == 'Parabola'):
 
     def Parabola(X, args):
