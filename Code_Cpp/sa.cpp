@@ -95,19 +95,19 @@ Results sa(double (*func)(double[], int, double[]), double LB[], double UB[],
     normal_distribution<double> norm(0.0, 1.0);
 
     /* Create arrays */
-	F = new double [p.epochs];              // Best cost for each epoch
-	sigma = new double [nVar];              // Standard deviation
-	best_pos = new double [nVar];           // Best position
+    F = new double [p.epochs];              // Best cost for each epoch
+    sigma = new double [nVar];              // Standard deviation
+    best_pos = new double [nVar];           // Best position
 
-	agent_pos = new double *[p.nPop];       // Agent's & neighbour's position
-	neigh_pos = new double *[p.nPop];
-	for (int i=0; i<p.nPop; i++) {
+    agent_pos = new double *[p.nPop];       // Agent's & neighbour's position
+    neigh_pos = new double *[p.nPop];
+    for (int i=0; i<p.nPop; i++) {
         agent_pos[i] = new double[nVar];
         neigh_pos[i] = new double[nVar];
     }
 
-	agent_cost = new double [p.nPop];       // Agent's & neighbour's cost
-	neigh_cost = new double [p.nPop];
+    agent_cost = new double [p.nPop];       // Agent's & neighbour's cost
+    neigh_cost = new double [p.nPop];
 
     if (p.normalize) {                      // Original quantities
         LB_orig = new double [nVar];
@@ -137,11 +137,11 @@ Results sa(double (*func)(double[], int, double[]), double LB[], double UB[],
     }
 
     /* Initial position of each agent */
-	for (int i=0; i<p.nPop; i++) {
+    for (int i=0; i<p.nPop; i++) {
         for (int j=0; j<nVar; j++) {
             agent_pos[i][j] = LB[j] + unif(generator) * (UB[j] - LB[j]);
         }
-	}
+    }
 
     /* Correct for any integer variable */
     for (int j=0; j<p.nIntVar; j++) {
@@ -170,7 +170,7 @@ Results sa(double (*func)(double[], int, double[]), double LB[], double UB[],
     /* Initial (overall) best position/cost */
     idx = fmin(agent_cost, p.nPop);
     best_cost = agent_cost[idx];
-	for (int j=0; j<nVar; j++) {
+    for (int j=0; j<nVar; j++) {
         best_pos[j] = agent_pos[idx][j];
     }
 
@@ -297,10 +297,10 @@ Results sa(double (*func)(double[], int, double[]), double LB[], double UB[],
         res.best_pos[j] = best_pos[j];
         res.sigma[j] = sigma[j];
     }
-  	res.F = new double [p.epochs];
+    res.F = new double [p.epochs];
     for (int epoch; epoch<p.epochs; epoch++) {
         res.F[epoch] = F[epoch];
     }
 
-	return res;
+    return res;
 }
