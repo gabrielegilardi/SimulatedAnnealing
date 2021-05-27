@@ -61,6 +61,7 @@ struct Results {
     double *sigma;
 };
 
+
 /* Returns the index corresponding to the minimum value of an array */
 int fmin(double A[], int n)
 {
@@ -101,8 +102,8 @@ Results sa(double (*func)(double[], int, double[]), double LB[], double UB[],
 	agent_pos = new double *[p.nPop];       // Agent's & neighbour's position
 	neigh_pos = new double *[p.nPop];
 	for (int i=0; i<p.nPop; i++) {
-		agent_pos[i] = new double[nVar];
-		neigh_pos[i] = new double[nVar];
+        agent_pos[i] = new double[nVar];
+        neigh_pos[i] = new double[nVar];
     }
 
 	agent_cost = new double [p.nPop];       // Agent's & neighbour's cost
@@ -114,7 +115,7 @@ Results sa(double (*func)(double[], int, double[]), double LB[], double UB[],
     	agent_pos_orig = new double *[p.nPop];
         neigh_pos_orig = new double *[p.nPop];
         for (int i=0; i<p.nPop; i++) {
-    		agent_pos_orig[i] = new double[nVar];
+            agent_pos_orig[i] = new double[nVar];
             neigh_pos_orig[i] = new double[nVar];
         }
     }
@@ -290,8 +291,8 @@ Results sa(double (*func)(double[], int, double[]), double LB[], double UB[],
     /* Copy solution */
     res.best_cost = best_cost;
     res.T = T;
-  	res.best_pos = new double [nVar];
-  	res.sigma = new double [nVar];
+    res.best_pos = new double [nVar];
+    res.sigma = new double [nVar];
     for (int j=0; j<nVar; j++) {
         res.best_pos[j] = best_pos[j];
         res.sigma[j] = sigma[j];
