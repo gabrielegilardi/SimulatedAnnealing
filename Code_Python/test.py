@@ -107,7 +107,7 @@ prob = 0.5
 normalize = False
 IntVar = None
 args = None
-seed = 1234567890
+seed = 123
 
 # Parabola: F(X) = sum((X - X0)^2)
 # Xmin = X0
@@ -196,7 +196,7 @@ else:
     sys.exit(1)
 
 # Solve
-np.random.MT19937(seed)
+np.random.seed(seed)
 X, info = SA(func, LB, UB, nPop=nPop, epochs=epochs, nMove=nMove, T0=T0,
              alphaT=alphaT, sigma0=sigma0, alphaS=alphaS, prob=prob,
              IntVar=IntVar, normalize=normalize, args=args)
