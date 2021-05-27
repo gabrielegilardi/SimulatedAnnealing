@@ -148,5 +148,5 @@ static
 # Docs directory
 Docs/
 
-# C++ directory
-Code_Cpp/
+# C++ exe
+Code_Cpp/*.exe

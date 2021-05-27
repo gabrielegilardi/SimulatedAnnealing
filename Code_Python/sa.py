@@ -30,9 +30,10 @@ def SA(func, LB, UB, nPop=10, epochs=100, nMove=20, T0=0.1, alphaT=0.99,
                     the function
 
     Dimensions:
-    (nVar, )        LB, UB, LB_orig, UB_orig, sigma
+    (nVar, )        LB, UB, LB_orig, UB_orig, sigma, best_pos
     (nPop, nVar)    agent_pos, neigh_pos, agent_pos_orig, neigh_pos_orig, flips
     (nPop)          agent_cost, neigh_cost
+    (epochs, )      F
     (0-nVar, )      IntVar
     """
     nVar = len(LB)
@@ -56,7 +57,7 @@ def SA(func, LB, UB, nPop=10, epochs=100, nMove=20, T0=0.1, alphaT=0.99,
     if (IntVar is None):
         nIntVar = 0
     else:
-        IntVar = np.asarray(IntVar, dtype=int) - 1
+        IntVar = np.asarray(IntVar, dtype=int)
         nIntVar = len(IntVar)
 
     # Initial position of each agent

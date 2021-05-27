@@ -47,17 +47,20 @@ sigma0 > 0
 IntVar
     List of indexes specifying which variable should be treated as integer.
     If all variables are real set <IntVar> = <None>. Indexes are specified
-    in the range 1 to <nVar>.
+    in the range 0 to <nVar-1>. It cannot be used when the search space is
+    normalized.
 normalize = True, False
     Specifies if the search space should be normalized. If <True>, parameter
-    <sigma0> is applied to the normalized search space.
+    <sigma0> is applied to the normalized search space. 
 args
     Tuple containing any parameter that needs to be passed to the function. If
     no parameters are passed set <args> = <None>.
 nVar
     Number of variables.
-Xsol
-    Solution to the minimization point. Set <Xsol> = <None> if not known.
+X0
+    Global minimum point (used only to compare with the numerical solution).
+seed
+    Seeding value for the random number generator.
 
 Examples
 --------
@@ -92,8 +95,22 @@ if len(sys.argv) != 2:
     sys.exit(1)
 example = sys.argv[1]
 
-# Parabola: F(X) = sum((X - X0)^2), Xmin = X0
+# Default parameters
+nPop = 20
+epochs = 1000
+nMove = 100
+T0 = 0.1
+alphaT = 0.99
+sigma0 = 0.1
+alphaS = 0.98
+prob = 0.5
+normalize = False
+IntVar = None
+args = None
+seed = 1234567890
 
+# Parabola: F(X) = sum((X - X0)^2)
+# Xmin = X0
 if (example == 'Parabola'):
 
     def Parabola(X, args):
@@ -101,64 +118,33 @@ if (example == 'Parabola'):
         F = ((X - X0) ** 2).sum(axis=1)
         return F
 
-    # Problem parameters
-    nVar = 20
-    X0 = np.ones(nVar) * 1.2345        # Args
-
-    # SA parameters
     func = Parabola
-    UB = np.ones(nVar) * 20.0
+    nVar = 20
+    UB = np.ones(nVar) * 500.0
     LB = - UB
-    nPop = 20
-    epochs = 1000
-    T0 = 0.1
-    alphaT = 0.99
-    alphaS = 0.98
-    nMove = 100
-    prob = 0.2
-    sigma0 = 0.1
-    IntVar = None
-    normalize = False
+    X0 = 1.1 * np.arange(0, nVar)
     args = (X0)
 
-    # Solution
-    Xsol = X0
-
-# Ackley: F(X)= 20 + exp(1) - exp(sum(cos(2*pi*X))/n)
-#               - 20*exp(-0.2*sqrt(sum(X^2)/n))
+# Ackley: F(X)= + 20 + exp(1) - exp(sum(cos(2*pi*(X-X0))/n)
+#               - 20*exp(-0.2*sqrt(sum((X-X0)^2)/n))
 # Xmin = X0
 elif (example == 'Ackley'):
 
     def Ackley(X, args):
         X0 = args
         n = float(X.shape[1])
-        F = 20.0 + np.exp(1.0) \
+        F = + 20.0 + np.exp(1.0) \
             - np.exp((np.cos(2.0 * np.pi * (X - X0))).sum(axis=1) / n) \
             - 20.0 * np.exp(-0.2 * np.sqrt(((X - X0) ** 2).sum(axis=1) / n))
         return F
 
-    # Function parameters
-    nVar = 10
-    X0 = np.ones(nVar) * 1.6            # args
-
-    # SA parameters
     func = Ackley
-    UB = np.ones(nVar) * 30.0
-    LB = - UB
+    nVar = 10
     nPop = 50
-    epochs = 1000
-    T0 = 0.1
-    alphaT = 0.99
-    alphaS = 0.99
-    nMove = 100
-    prob = 0.3
-    sigma0 = 0.1
-    IntVar = None
-    normalize = False
+    UB = np.ones(nVar) * 50.0
+    LB = - UB
+    X0 = np.ones(nVar) * 1.6789
     args = (X0)
-
-    # Solution
-    Xsol = X0
 
 # Tripod:
 # F(x,y)= p(y)*(1 + p(x)) + abs(x + kx*p(y)*(1 - 2*p(x)))
@@ -178,66 +164,39 @@ elif (example == 'Tripod'):
             + np.abs(y + ky * (1.0 - 2.0 * py))
         return F
 
-    # Function parameters
+    func = Tripod
     nVar = 2                # The equation works only with two dimensions
     kx = 20.0               # Args
     ky = 40.0
-
-    # SA parameters
-    func = Tripod
     UB = np.ones(nVar) * 100.0
     LB = - UB
-    nPop = 10
-    epochs = 1000
-    T0 = 0.1
-    alphaT = 0.99
-    alphaS = 0.98
-    nMove = 50
-    prob = 0.5
-    sigma0 = 0.1
-    IntVar = None
-    normalize = False
+    X0 = np.array([0.0, -ky])
     args = (kx, ky)
 
-    # Solution
-    Xsol = np.array([0.0, -ky])
-
-# Alpine: F(X) = sum(abs(X*sin(X) + 0.1*X)), Xmin = 0
+# Alpine: F(X) = sum(abs(X*sin(X) + 0.1*X))
+# Xmin = 0
+# Note: the solution is VERY sensitive to the parameter values and the
+#       random generated numbers
 elif (example == 'Alpine'):
 
     def Alpine(X, args):
         F = np.abs(X * np.sin(X) + 0.1 * X).sum(axis=1)
         return F
 
-    # Function parameters
-    nVar = 10
-
-    # SA parameters
     func = Alpine
+    nVar = 10
+    sigma0 = 0.4
+    alphaS = 1.0
     UB = np.ones(nVar) * 10.0
     LB = - UB
-    nPop = 20
-    epochs = 500
-    T0 = 1.0
-    alphaT = 0.99
-    alphaS = 1.0
-    nMove = 50
-    prob = 0.3
-    sigma0 = 0.2
-    IntVar = None
-    normalize = False
-    args = None
-
-    # Solution
-    Xsol = np.zeros(nVar)
+    X0 = np.zeros(nVar)
 
 else:
     print("Function not found")
     sys.exit(1)
 
-np.random.seed(1294404794)          # Seed random generator
-
 # Solve
+np.random.MT19937(seed)
 X, info = SA(func, LB, UB, nPop=nPop, epochs=epochs, nMove=nMove, T0=T0,
              alphaT=alphaT, sigma0=sigma0, alphaS=alphaS, prob=prob,
              IntVar=IntVar, normalize=normalize, args=args)
@@ -250,6 +209,4 @@ print(X)
 print("\nCost: ", F[-1])
 print("Final T: ", T_final)
 print("Final sigma (avr): ", sigma_final.mean())
-if (Xsol is not None):
-    error = np.linalg.norm(Xsol - X)
-    print("Error: {0:e}".format(error))
+print("Error: {0:e}".format(np.linalg.norm(X0 - X)))
