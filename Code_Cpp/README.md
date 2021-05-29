@@ -1,8 +1,10 @@
 # Metaheuristic Optimization Using Population-Based Simulated Annealing
 
+There are two versions: one using the Eigen library for linear algebra (ver. 3.3.9), and the other using plain vanilla C++.
+
 ## Features
 
-- The code has been written in plain vanilla C++ and tested using g++ 8.1.0 (MinGW-W64).
+- The code has been tested using g++ 8.1.0 (MinGW-W64).
 - Variables can be real, integer, or mixed real/integer.
 - Variables can be constrained to a specific interval or value setting the lower and the upper boundaries.  
 - Neighboroud search is performed using a normal distribution along randomly chosen dimensions.
@@ -10,7 +12,7 @@
 - Search space can be normalized to improve convergency.
 - An arbitrary number of parameters can be passed (in a tuple) to the function to minimize.
 - Solver parameters and results are passed using structures.
-- Usage: *test.exe example*.
+- Usage: *test.exe example* and *test_Eigen.exe example*.
 
 ## Main Parameters
 
@@ -42,6 +44,8 @@
 
 `nVar` Number of variables (dimensions of the search space).
 
+`nIntVar` Number of integer variables.
+
 `X0` Global minimum point (used only to compare with the numerical solution).
 
 `seed` Seeding value for the random number generator.
@@ -58,8 +62,9 @@ There are four examples: Parabola, Alpine, Tripod, and Ackley (see *test.py* for
 
 - The global minimum for **Parabola** and **Ackley** is at `X0`; the global minimum for **Alpine** is at zero; the global minimum for **Tripod** is at `[0,-ky]` with local minimum at `[-kx,+ky]` and `[+kx,+ky]`.
 
-## Reference
+## References
 
 - Wikipedia, "[Simulated Annealing](https://en.wikipedia.org/wiki/Simulated_annealing)".
 - Kirkpatrick et al., 1983, "[Optimization by Simulated Annealing](https://www.jstor.org/stable/1690046)", JSTOR.
 - Jamil and Yang, 2013, "[A Literature Survey of Benchmark Functions For Global Optimization Problems](https://arxiv.org/abs/1308.4008)", arVix.
+- [Eigen](https://eigen.tuxfamily.org/) template library for linear algebra.

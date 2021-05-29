@@ -57,6 +57,8 @@ args
     no parameters are passed set <args> = <None>.
 nVar
     Number of variables.
+nIntVar >= 0
+    Number of integer variables.
 X0
     Global minimum point (used only to compare with the numerical solution).
 seed
@@ -185,7 +187,7 @@ elif (example == 'Alpine'):
 
     func = Alpine
     nVar = 10
-    sigma0 = 0.4
+    sigma0 = 0.2
     alphaS = 1.0
     UB = np.ones(nVar) * 10.0
     LB = - UB

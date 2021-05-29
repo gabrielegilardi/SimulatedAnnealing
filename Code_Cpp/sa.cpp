@@ -180,7 +180,7 @@ Results sa(double (*func)(double[], int, double[]), double LB[], double UB[],
         /* Sub-loop (search the neighboroud of a state) */
         for (int move=0; move<p.nMove; move++) {
 
-            /* Create the agent's neighbours */
+            /* Create each agent's neighbours */
             for (int i=0; i<p.nPop; i++) {
                 for (int j=0; j<nVar; j++) {
                     if (unif(generator) <= p.prob) {
@@ -247,6 +247,8 @@ Results sa(double (*func)(double[], int, double[]), double LB[], double UB[],
 
                 /* ... or decide probabilistically */
                 else {
+
+                    /* Acceptance probability */
                     delta = (neigh_cost[i] - agent_cost[i]) / agent_cost[i];
                     prob_swap = exp(-delta / T);
 

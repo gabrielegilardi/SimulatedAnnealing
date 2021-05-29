@@ -42,6 +42,8 @@
 
 `nVar` Number of variables (dimensions of the search space).
 
+`nIntVar` Number of integer variables.
+
 `X0` Global minimum point (used only to compare with the numerical solution).
 
 `seed` Seeding value for the random number generator.
@@ -58,7 +60,7 @@ There are four examples: Parabola, Alpine, Tripod, and Ackley (see *test.py* for
 
 - The global minimum for **Parabola** and **Ackley** is at `X0`; the global minimum for **Alpine** is at zero; the global minimum for **Tripod** is at `[0,-ky]` with local minimum at `[-kx,+ky]` and `[+kx,+ky]`.
 
-## Reference
+## References
 
 - Wikipedia, "[Simulated Annealing](https://en.wikipedia.org/wiki/Simulated_annealing)".
 - Kirkpatrick et al., 1983, "[Optimization by Simulated Annealing](https://www.jstor.org/stable/1690046)", JSTOR.

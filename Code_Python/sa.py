@@ -39,10 +39,6 @@ def SA(func, LB, UB, nPop=10, epochs=100, nMove=20, T0=0.1, alphaT=0.99,
     """
     nVar = len(LB)
 
-    F = np.zeros(epochs)
-    neigh_pos = np.zeros((nPop, nVar))      # Neighbour state
-    neigh_cost = np.zeros(nPop)             # Neighbour cost
-
     # Normalize search space
     if (normalize):
         LB_orig = LB.copy()
@@ -53,8 +49,7 @@ def SA(func, LB, UB, nPop=10, epochs=100, nMove=20, T0=0.1, alphaT=0.99,
     T = T0                          # Temperature
     sigma = sigma0 * (UB - LB)      # Standard deviation of each dimension
 
-    # Define (if any) which variables are treated as integers (indexes are in
-    # the range 1 to nVar)
+    # Define (if any) which variables are treated as integers
     if (IntVar is None):
         nIntVar = 0
     else:
@@ -80,7 +75,8 @@ def SA(func, LB, UB, nPop=10, epochs=100, nMove=20, T0=0.1, alphaT=0.99,
     best_pos = agent_pos[idx, :]
     best_cost = agent_cost[idx]
 
-    # Main loop (temperature is fixed)
+    # Main loop (T = const)
+    F = np.zeros(epochs)
     for epoch in range(epochs):
 
         # Sub-loop (search the neighboroud of a state)
@@ -138,7 +134,7 @@ def SA(func, LB, UB, nPop=10, epochs=100, nMove=20, T0=0.1, alphaT=0.99,
                 best_cost = agent_cost[idx]
                 best_pos = agent_pos[idx, :]
 
-        # Save the (min) function value for this epoch
+        # Save the best cost for this epoch
         F[epoch] = best_cost
 
         # Cooling scheduling

@@ -6,8 +6,8 @@ Copyright (c) 2021 Gabriele Gilardi
 
 Features
 --------
-- The code has been written in plain vanilla C++ and tested using g++ 8.1.0
-  (MinGW-W64).
+- The code has been written in C++ using the Eigen library (ver. 3.3.9) and
+  tested using g++ 8.1.0 (MinGW-W64).
 - Variables can be real, integer, or mixed real/integer.
 - Variables can be constrained to a specific interval or value setting the
   lower and the upper boundaries.
@@ -19,7 +19,7 @@ Features
 - An arbitrary number of parameters can be passed (in a tuple) to the function
   to minimize.
 - Solver parameters and results are passed using structures.
-- Usage: test.exe <example>.
+- Usage: test_Eigen.exe <example>.
 
 Main Parameters
 ---------------
@@ -85,11 +85,15 @@ References
   @ https://www.jstor.org/stable/1690046
 - Jamil and Yang, 2013, "A Literature Survey of Benchmark Functions For Global
   Optimization Problems", arXiv @ https://arxiv.org/abs/1308.4008
+- Eigen template library for linear algebra @ https://eigen.tuxfamily.org/
 */
 
 #include <random>
+#include <Eigen/Dense>
+#include <iostream>
 
 using namespace std;
+using namespace Eigen;
 
 /* Structure used to pass the parameters (with default values) */
 struct Parameters {
@@ -102,35 +106,37 @@ struct Parameters {
     double alphaS = 0.98;
     double prob = 0.5;
     bool normalize = false;
-    int *IntVar = NULL;
-    int nIntVar = 0;
-    double *args = NULL;
+    ArrayXi IntVar;
+    ArrayXXd args;
     int seed = 1234567890;
 };
 
 /* Structure used to return the results */
 struct Results {
     double best_cost;
-    double *best_pos;
-    double *F;
+    ArrayXXd best_pos;
+    ArrayXd F;
     double T;
-    double *sigma;
+    ArrayXXd sigma;
 };
 
+
 /* Simulated annealing function prototype */
-Results sa(double (*func)(double[], int, double[]), double LB[], double UB[],
-           int nVar, Parameters p);
+Results sa(ArrayXd (*func)(ArrayXXd, ArrayXXd), ArrayXXd LB, ArrayXXd UB,
+           Parameters p);
+
 
 // Parabola: F(X) = sum((X - X0)^2)
 // Xmin = X0
-double Parabola(double X[], int nVar, double args[])
+ArrayXd Parabola(ArrayXXd X, ArrayXXd args)
 {
-    double f = 0.0, dX;
+    int nPop;
+    ArrayXd f;
+    ArrayXXd dX;
 
-    for (int j=0; j<nVar; j++) {
-        dX = X[j] - args[j];
-        f += dX * dX;
-    }
+    nPop = X.rows();
+    dX = X - args.replicate(nPop, 1);
+    f = (dX * dX).rowwise().sum();
 
     return f;
 }
@@ -139,19 +145,19 @@ double Parabola(double X[], int nVar, double args[])
 // Ackley: F(X)= + 20 + exp(1) - exp(sum(cos(2*pi*(X-X0))/n)
 //               - 20*exp(-0.2*sqrt(sum((X-X0)^2)/n))
 // Xmin = X0
-double Ackley(double X[], int nVar, double args[])
+ArrayXd Ackley(ArrayXXd X, ArrayXXd args)
 {
-    double f, dX, sum1 = 0.0, sum2 = 0.0;
     const double pi = 3.14159265358979323846;
-    
-    for (int j=0; j<nVar; j++) {
-        dX = X[j] - args[j];
-        sum1 += cos(2.0 * pi * dX);
-        sum2 += dX * dX;
-    }
+    int nPop, nVar;
+    ArrayXd f;
+    ArrayXXd dX;
 
-    f = 20.0 + exp(1.0) - exp(sum1 / double(nVar)) -
-        20.0 * exp(-0.2 * sqrt(sum2 / double(nVar)));
+    nPop = X.rows();
+    nVar = X.cols();
+    dX = X - args.replicate(nPop, 1);
+    f = + 20.0 + exp(1.0)
+        - exp((cos(2.0 * pi * dX)).rowwise().sum() / nVar)
+        - 20.0 * exp(-0.2 * sqrt((dX * dX).rowwise().sum() / nVar));
 
     return f;
 }
@@ -162,12 +168,15 @@ double Ackley(double X[], int nVar, double args[])
 //         + abs(y + ky*(1 - 2*p(y)))
 // p(x) = 1 if x >= 0, p(x) = 0 if x < 0; p(y) = 1 if y >= 0, p(y) = 0 if y < 0
 // Global minimum at [0,-ky], local minimum at [-kx,ky] and [kx,ky]; kx, ky > 0
-double Tripod(double X[], int nVar, double args[])
+ArrayXd Tripod(ArrayXXd X, ArrayXXd args)
 {
-    double x = X[0], y = X[1], kx = args[0], ky = args[1], px, py, f;
+    double kx = args(0, 0), ky = args(0, 1);
+    ArrayXd f, x, y, px, py;
 
-    px = (x >= 0.0) ? 1.0 : 0.0;
-    py = (y >= 0.0) ? 1.0 : 0.0;
+    x = X.col(0);
+    y = X.col(1);
+    px = (x >= 0.0).cast<double>();
+    py = (y >= 0.0).cast<double>();
 
     f = py * (1.0 + px) + abs(x + kx * py * (1.0 - 2.0 * px)) +
         abs(y + ky * (1.0 - 2.0 * py));
@@ -178,13 +187,11 @@ double Tripod(double X[], int nVar, double args[])
 
 // Alpine: F(X) = sum(abs(X*sin(X) + 0.1*X))
 // Xmin = 0
-double Alpine(double X[], int nVar, double args[])
+ArrayXd Alpine(ArrayXXd X, ArrayXXd args)
 {
-    double f = 0.0;
+    ArrayXd f;
 
-    for (int j=0; j<nVar; j++) {
-        f += abs(X[j] * sin(X[j]) + 0.1 * X[j]);
-    }
+    f = (abs(X * sin(X) + 0.1 * X)).rowwise().sum();
 
     return f;
 }
@@ -197,13 +204,15 @@ int main(int argc, char **argv)
     Results res;
     string example;
     int nVar;
-    double sum = 0.0, err = 0.0;
-    double *UB, *LB, *X0;
-    double (*func)(double[], int, double[]);
+    double sum, err;
+
+    /*Eigen declarations*/
+    ArrayXXd UB, LB, X0;
+    ArrayXd (*func)(ArrayXXd, ArrayXXd);
 
     /* Read example to run */
     if (argc != 2) {
-        printf("\nUsage: test <example>\n");
+        printf("\nUsage: test_Eigen <example>\n");
         exit(EXIT_FAILURE);
     }
     example = argv[1];
@@ -214,22 +223,15 @@ int main(int argc, char **argv)
         func = Parabola;
         nVar = 20;
 
-        UB = new double [nVar];             // Upper and lower boundaries
-        LB = new double [nVar];
+        UB.setConstant(1, nVar, 500.0);     // Upper and lower boundaries
+        LB = -UB;
+
+        X0.setZero(1, nVar);                // Global minimum
         for (int i=0; i<nVar; i++) {
-            UB[i] = +500.0;
-            LB[i] = -500.0;
+            X0(0, i) = 1.1 * double(i);
         }
 
-        X0 = new double [nVar];             // Global minimum
-        for (int i=0; i<nVar; i++) {
-            X0[i] = 1.1 * double(i);
-        }
-
-        p.args = new double [nVar];         // Arguments
-        for (int i=0; i<nVar; i++) {
-            p.args[i] = X0[i];
-        }
+        p.args = X0;                        // Arguments
     }
 
     // Ackley: F(X)= + 20 + exp(1) - exp(sum(cos(2*pi*(X-X0))/n)
@@ -240,22 +242,12 @@ int main(int argc, char **argv)
         nVar = 10;
         p.nPop = 50;
 
-        UB = new double [nVar];             // Upper and lower boundaries
-        LB = new double [nVar];
-        for (int i=0; i<nVar; i++) {
-            UB[i] = +50.0;
-            LB[i] = -50.0;
-        }
+        UB.setConstant(1, nVar, 50.0);      // Upper and lower boundaries
+        LB = -UB;
 
-        X0 = new double [nVar];             // Global minimum
-        for (int i=0; i<nVar; i++) {
-            X0[i] = 1.6789;
-        }
+        X0.setConstant(1, nVar, 1.6789);    // Global minimum
 
-        p.args = new double [nVar];         // Arguments
-        for (int i=0; i<nVar; i++) {
-            p.args[i] = X0[i];
-        }
+        p.args = X0;                        // Arguments
     }
 
     // Tripod:
@@ -269,20 +261,15 @@ int main(int argc, char **argv)
         double kx = 20.0;
         double ky = 40.0;
 
-        UB = new double [nVar];             // Upper and lower boundaries
-        LB = new double [nVar];
-        for (int i=0; i<nVar; i++) {
-            UB[i] = +100.0;
-            LB[i] = -100.0;
-        }
+        UB.setConstant(1, nVar, 100.0);     // Upper and lower boundaries
+        LB = -UB;
 
-        X0 = new double [nVar];             // Global minimum
-        X0[0] = 0.0;
-        X0[1] = -ky;
+        X0.setZero(1, nVar);                // Global minimum
+        X0(0, 1) = -ky;
 
-        p.args = new double [nVar];         // Arguments
-        p.args[0] = kx;
-        p.args[1] = ky;
+        p.args.setZero(1, nVar);            // Arguments
+        p.args(0, 0) = kx;
+        p.args(0, 1) = ky;
     }
 
     // Alpine: F(X) = sum(abs(X*sin(X) + 0.1*X))
@@ -295,17 +282,10 @@ int main(int argc, char **argv)
         p.sigma0 = 0.2;
         p.alphaS = 1.0;
 
-        UB = new double [nVar];             // Upper and lower boundaries
-        LB = new double [nVar];
-        for (int i=0; i<nVar; i++) {
-            UB[i] = +10.0;
-            LB[i] = -10.0;
-        }
+        UB.setConstant(1, nVar, 10.0);      // Upper and lower boundaries
+        LB = -UB;
 
-        X0 = new double [nVar];             // Global minimum
-        for (int i=0; i<nVar; i++) {
-            X0[i] = 0.0;
-        }
+        X0.setZero(1, nVar);                // Global minimum
     }
 
     else {
@@ -314,20 +294,18 @@ int main(int argc, char **argv)
     }
 
     /* Solve */
-    res = sa(func, LB, UB, nVar, p);
+    res = sa(func, LB, UB, p);
 
     /* Print results */
     printf("\nBest position:");
     for (int j=0; j<nVar; j++) {
-        printf("\n %g", res.best_pos[j]);
+        printf("\n %g", res.best_pos(0, j));
     }
     printf("\n\nCost: %g", res.best_cost);
     printf("\nFinal T: %g", res.T);
-    for (int j=0; j<nVar; j++) {
-        sum += res.sigma[j];
-        err += (res.best_pos[j] - X0[j]) * (res.best_pos[j] - X0[j]);
-    }
+    sum = res.sigma.sum();
     printf("\nFinal sigma (avr): %g", sum / double(nVar));
+    err = ((res.best_pos - X0) * (res.best_pos - X0)).sum();
     printf("\nError: %g\n", sqrt(err));
 
     return 0;
