@@ -63,7 +63,7 @@ struct Results {
 };
 
 
-/* Minimiza a function using simulated annealing */
+/* Minimize a function using simulated annealing */
 Results sa(ArrayXd (*func)(ArrayXXd, ArrayXXd), ArrayXXd LB, ArrayXXd UB,
            Parameters p)
 {
