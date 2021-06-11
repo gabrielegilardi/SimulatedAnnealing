@@ -79,7 +79,7 @@ int fmin(double A[], int n)
 }
 
 
-/* Minimiza a function using simulated annealing */
+/* Minimize a function using simulated annealing */
 Results sa(double (*func)(double[], int, double[]), double LB[], double UB[],
            int nVar, Parameters p)
 {
